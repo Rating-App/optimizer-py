@@ -1,0 +1,3 @@
+Lists are slow! Compare:
+time python3 make_matrix-alt.py
+time python3 make_matrix.py
