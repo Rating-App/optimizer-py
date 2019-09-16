@@ -6,7 +6,6 @@ import time
 import sys
 
 RANK = 100
-EPS = 0.48
 
 conn = psycopg2.connect("dbname='rateme' user='rateme' host='localhost' password='1'")
 
@@ -70,21 +69,15 @@ def project_low_rank(matrix):
 
     return ut.T @ np.diag(s) @ vt
 
-def project_one_rank(matrix):
-    ut, s, vt = sparsesvd(csc_matrix(matrix), 1)
-
-    return ut.T @ np.diag(s) @ vt
-
 observed_padded = csc_matrix((data, (mrow, mcol)), shape=(num_users, num_cards))
 mask = csc_matrix((np.ones(len(data)), (mrow, mcol)), shape=(num_users, num_cards)).toarray()
 M = csc_matrix((np.zeros(len(data)), (mrow, mcol)), shape=(num_users, num_cards)).toarray()
 N = csc_matrix((np.zeros(len(data)), (mrow, mcol)), shape=(num_users, num_cards)).toarray()
-W = project_one_rank(mask)
 
 print("iter, time, step, dist")
 starting_time = time.time()
 for i in range(100):
-    M = project_low_rank(M + (observed_padded - M*mask)/(W + EPS))
+    M = project_low_rank(M + (observed_padded - M*mask))
 
     print(i, time.time() - starting_time,
                 np.linalg.norm(N-M),
